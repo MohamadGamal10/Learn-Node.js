@@ -18,7 +18,10 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     // const books = await Book.find();
-    const books = await Book.find().populate("author", ["firstName", "lastName"]);
+    const books = await Book.find().populate("author", [
+      "firstName",
+      "lastName",
+    ]);
     res.status(200).json(books);
   })
 );

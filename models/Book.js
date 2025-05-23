@@ -60,5 +60,5 @@ const Book = mongoose.model("Book", BookSchema);
 module.exports = {
   Book,
   validateCreateBook,
-  validateUpdateBook,
+  validateUpdateBook
 };
