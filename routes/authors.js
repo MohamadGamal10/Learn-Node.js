@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("joi");
-const { Author } = require("../models/Author");
+const {
+  Author,
+  validateCreateAuthor,
+  validateUpdateAuthor,
+} = require("../models/Author");
 
 // const authors = new Author({
 //   firstName: "mohamed",
@@ -86,22 +89,38 @@ router.post("/", async (req, res) => {
  * @access Public
  */
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   const { error } = validateUpdateAuthor(req.body);
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  const author = authors.find((b) => b.id === parseInt(req.params.id));
-  if (author) {
-    author.firstName = req.body.firstName;
-    author.lastName = req.body.lastName;
-    author.nationality = req.body.nationality;
-    author.image = req.body.image;
-    res.status(200).json(author);
-  } else {
-    res.status(404).json({ message: "author not found" });
+  try {
+    const author = await Author.findById(req.params.id);
+
+    if (author) {
+      const authorUpdated = await Author.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            nationality: req.body.nationality,
+            image: req.body.image,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      res.status(200).json(authorUpdated);
+    } else {
+      res.status(404).json({ message: "author not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 });
 
@@ -112,37 +131,19 @@ router.put("/:id", (req, res) => {
  * @access Public
  */
 
-router.delete("/:id", (req, res) => {
-  const author = authors.find((b) => b.id === parseInt(req.params.id));
-  if (author) {
-    const index = authors.indexOf(author);
-    authors.splice(index, 1);
-    res.status(200).json({ message: "author deleted" });
-  } else {
-    res.status(404).json({ message: "author not found" });
+router.delete("/:id", async (req, res) => {
+  try {
+    const author = await Author.findById(req.params.id);
+    if (author) {
+      await Author.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message: "author deleted" });
+    } else {
+      res.status(404).json({ message: "author not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
 });
-
-// validate Create author
-function validateCreateAuthor(author) {
-  const schema = Joi.object({
-    firstName: Joi.string().trim().min(3).max(200).required(),
-    lastName: Joi.string().trim().min(3).max(200).required(),
-    nationality: Joi.string().trim().min(3).max(200).required(),
-    image: Joi.string().trim(),
-  });
-  return schema.validate(author);
-}
-
-// validate Update author
-function validateUpdateAuthor(author) {
-  const schema = Joi.object({
-    firstName: Joi.string().trim().min(3).max(200),
-    lastName: Joi.string().trim().min(3).max(200),
-    nationality: Joi.string().trim().min(3).max(200),
-    image: Joi.string().trim(),
-  });
-  return schema.validate(author);
-}
 
 module.exports = router;
