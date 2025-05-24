@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { User, validateRegisterUser, validateLoginUser } = require("../models/User");
 
 /**
@@ -34,7 +35,7 @@ router.post("/register", asyncHandler(
         });
 
         const result = await user.save();
-        const token = null;
+        const token = jwt.sign({ id: result._id, isAdmin: result.isAdmin }, process.env.JWT_SECRET_KEY);
 
         const {password, ...others} = result._doc;
 
@@ -66,7 +67,9 @@ router.post("/login", asyncHandler(
             return res.status(400).json({ message: "Invalid Password or Password" });
         }
 
-        const token = null; 
+                      // jwt.sign(payload, secret)
+        const token = jwt.sign({ id: userExists._id, isAdmin: userExists.isAdmin }, process.env.JWT_SECRET_KEY); 
+        // const token = jwt.sign({ id: userExists._id, username: userExists.username }, "secretKey", { expiresIn: "1d" }); 
 
         const {password, ...others} = userExists._doc;
 
