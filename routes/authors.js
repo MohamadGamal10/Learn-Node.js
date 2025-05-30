@@ -18,7 +18,13 @@ const { verifyTokenAndAdmin } = require("../middlewares/verifyToken");
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const authors = await Author.find();
+
+    const { pageNumber } = req.query;
+    const authorsPerPage = 2;
+
+    // const authors = await Author.find();
+    // Skip & Limit used to get paginated data
+    const authors = await Author.find().skip((pageNumber - 1) * authorsPerPage).limit(authorsPerPage); // skip first 2 authors & limit get 2 authors after skip
     // const authors = await Author.find().sort({ firstName: 1 }).select("firstName lastName -_id");
     res.status(200).json(authors);
   })
