@@ -13,14 +13,21 @@ const app = express();
 // apply middleware
 app.use(express.json());
 
+// mvc
+app.use(express.urlencoded({ extended: false }));
+
 // logger middleware
 app.use(logger);
+
+// set view engine / mvc
+app.set("view engine", "ejs");
 
 // routes
 app.use("/api/books", require("./routes/books"));
 app.use("/api/authors", require("./routes/authors"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
+app.use("/password", require("./routes/password")); // mvc
 
 // error handler middleware
 app.use(notFound);
