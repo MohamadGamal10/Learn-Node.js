@@ -3,12 +3,16 @@ const logger = require("./middlewares/logger");
 const { notFound, errorHandler } = require("./middlewares/errors");
 const connectToDb = require("./config/db");
 require("dotenv").config();
+const path = require("path");
 
 // connect to db
 connectToDb();
 
 // init app
 const app = express();
+
+// static files
+app.use(express.static(path.join(__dirname, "images")));
 
 // apply middleware
 app.use(express.json());
@@ -27,6 +31,7 @@ app.use("/api/books", require("./routes/books"));
 app.use("/api/authors", require("./routes/authors"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/upload", require("./routes/upload"));
 app.use("/password", require("./routes/password")); // mvc
 
 // error handler middleware
